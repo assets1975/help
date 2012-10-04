@@ -1,0 +1,2 @@
+как добавить линию
+console->Graph Template (edit) add Graph items item-HRULE = value = |thold:hi:traffic_in|

@@ -1,0 +1,14 @@
+#if not install express
+npm install express
+
+cd nodejs_app
+
+express HelloWorldApp
+
+cd HelloWorldApp
+
+npm install
+
+
+
+

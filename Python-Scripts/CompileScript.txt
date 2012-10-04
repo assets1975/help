@@ -1,0 +1,34 @@
+# Два приведенных Python-скрипта нужно (1) просто запустить в интерпретаторе, 
+# (2) предварительно скомпилировать в файл .pyc и только потом запустить, 
+# а также (3) преобразовать в программу на Си с помощью Cython, 
+# собрать, используя GCC, и запустить получившийся бинарник. 
+
+# Мы проверим все эти варианты!
+
+# Преобразовать .py в .pyc очень просто:
+python -m compileall .
+
+# С Cython чуточку сложнее. Сначала получаем код на Си:
+cython python.py --embed -o python.c
+
+#Дальше можно попытаться его скомпилировать:
+gcc -O2 ./python.c -o ./c_python \ 
+	-I/usr/local/include/python2.7 -L/usr/local/lib/ -lpython2.7
+
+# Вот только это не будет работать. Полезут ошибки:
+#  ./python.c: In function 'main':
+#  ./python.c:845: error: conflicting types for 'm'
+#  ./python.c:838: error: previous definition of 'm' was here
+#  ./python.c:866: warning: comparison between pointer and integer
+
+# Смотрим python.c:
+
+#ifdef __FreeBSD__
+    fp_except_t m;
+
+    m = fpgetmask();
+    fpsetmask(m & ~FP_X_OFL);
+#endif
+
+# Проблема в том, что другая переменная с именем m объявлена несколькими строками выше. 
+# Так что вторую m нужно переименовать, после чего программа успешно соберется.

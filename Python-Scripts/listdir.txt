@@ -1,0 +1,13 @@
+os.listdir("c:\\music\\_singles\\")  
+dirname = "c:\\"
+os.listdir(dirname)
+[f for f in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, f))]
+[f for f in os.listdir(dirname) if os.path.isdir(os.path.join(dirname, f))] 
+
+
+def listDirectory(directory, fileExtList):                                        
+    """возвращает список объектов с метаинформацией для всех файлов с
+указанным расширением"""                       
+    fileList = [os.path.normcase(f) for f in os.listdir(directory)]               
+    fileList = [os.path.join(directory, f) for f in fileList \
+                if os.path.splitext(f)[1] in fileExtList]        

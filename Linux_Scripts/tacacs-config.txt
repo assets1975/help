@@ -1,0 +1,101 @@
+hwtacacs-server template tacacs
+hwtacacs-server authentication 172.25.0.130
+hwtacacs-server authentication 172.25.0.12 secondary
+hwtacacs-server authorization 172.25.0.130
+hwtacacs-server authorization 172.25.0.12 secondary
+hwtacacs-server accounting 172.25.0.130
+hwtacacs-server accounting 172.25.0.12 secondary
+hwtacacs-server source-ip 172.25.16.254
+hwtacacs-server shared-key cipher XXXXXXXXXXXXXXX!!!
+
+aaa
+authentication-scheme default
+authentication-scheme tacacs
+authentication-mode hwtacacs local
+authentication-super hwtacacs super
+authorization-scheme default
+authorization-scheme tacacs
+authorization-mode hwtacacs local
+accounting-scheme default
+accounting-scheme tacacs
+accounting-mode hwtacacs
+accounting start-fail online
+domain default 
+authentication-scheme tacacs
+accounting-scheme tacacs
+authorization-scheme tacacs
+hwtacacs-server tacacs
+domain default_admin
+local-user admin password cipher ):>!!!
+local-user admin privilege level 1
+local-user admin ftp-directory flash:
+local-user admin service-type telnet terminal ssh ftp
+#
+acl number 2000
+rule 5 permit source 172.25.0.0 0.0.0.255
+rule 10 deny
+
+interface Vlanif305
+ip address 172.25.16.254 255.255.255.0
+
+user-interface vty 0 4
+acl 2000 inbound
+authentication-mode aaa
+protocol inbound all
+
+
+<PS526_4-AGG1>dis startup
+MainBoard:
+Configured startup system software: flash:/s5300ei-v100r005c01spc100.cc
+Startup system software: flash:/s5300ei-v100r005c01spc100.cc
+Next startup system software: flash:/s5300ei-v100r005c01spc100.cc
+Startup saved-configuration file: flash:/vrpcfg.zip
+Next startup saved-configuration file: flash:/vrpcfg.zip
+Startup paf file: NULL
+Next startup paf file: NULL
+Startup license file: NULL
+Next startup license file: NULL
+Startup patch package: flash:/s23_33_53-v100r003sph005.pat
+Next startup patch package: flash:/s23_33_53-v100r003sph005.pat
+
+<PS526_4-AGG1>display hwtacacs-server template
+---------------------------------------------------------------------------
+HWTACACS-server template name : tacacs
+Primary-authentication-server : 172.25.0.130:49:-
+Primary-authorization-server : 172.25.0.130:49:-
+Primary-accounting-server : 172.25.0.130:49:-
+Secondary-authentication-server : 172.25.0.12:49:-
+Secondary-authorization-server : 172.25.0.12:49:-
+Secondary-accounting-server : 172.25.0.12:49:-
+Current-authentication-server : 172.25.0.130:49:-
+Current-authorization-server : 172.25.0.130:49:-
+Current-accounting-server : 172.25.0.130:49:-
+Source-IP-address : 172.25.16.254
+Shared-key : ****************
+Quiet-interval(min) : 5
+Response-timeout-Interval(sec) : 5
+Domain-included : Yes
+Traffic-unit : B
+---------------------------------------------------------------------------
+Total 1,1 printed
+
+<PS526_4-AGG1>dis aaa configuration
+
+Domain Name Delimiter : @
+Domainname parse direction : Left to right
+Domainname location : After-delimiter
+Domain : total: 32 used: 2 
+Authentication-scheme : total: 16 used: 2 
+Accounting-scheme : total: 16 used: 2 
+Authorization-scheme : total: 16 used: 2 
+Service-scheme : total: 16 used: 0
+
+
+-----------------------------------------------
+
+domain default_admin
+authentication-scheme tacacs
+accounting-scheme tacacs
+authorization-scheme tacacs
+
+Заработало.

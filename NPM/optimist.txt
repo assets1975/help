@@ -1,0 +1,117 @@
+На этот раз я представлю Вам node-optimist — лёгкий парсер аргументов командной строки. Эта библиотека также написана Джеймсом Хэллидэем (SubStack), одним из основателей Browserling и Testling.
+
+
+Вам интересно насколько простым может быть парсер аргументов командной строки? Смотрите:
+
+var argv = require('optimist').argv;
+И всё готово! Все параметры разобраны и помещены в argv.
+
+Вот разные примеры использования. Для начала, в библиотеке есть поддержка длинных аргументов:
+
+#!/usr/bin/env node
+var argv = require('optimist').argv;
+ 
+if (argv.rif - 5 * argv.xup > 7.138) {
+    console.log('Buy more riffiwobbles');
+}
+else {
+    console.log('Sell the xupptumblers');
+}
+Теперь можно запустить этот скрипт с параметрами --rif и --xup, вот так:
+
+$ ./xup.js --rif=55 --xup=9.52
+Buy more riffiwobbles
+
+$ ./xup.js --rif 12 --xup 8.1
+Sell the xupptumblers
+
+
+Кроме этого, поддерживаются короткие аргументы:
+
+#!/usr/bin/env node
+var argv = require('optimist').argv;
+console.log('(%d,%d)', argv.x, argv.y);
+Можно использовать -x и -y для передачи параметров:
+
+$ ./short.js -x 10 -y 21
+(10,21)
+
+
+Node-optimist также поддерживает двоичные аргументы — короткие, длинные и смешанные:
+
+#!/usr/bin/env node
+var argv = require('optimist').argv;
+ 
+if (argv.s) {
+    console.log(argv.fr ? 'Le chat dit: ' : 'The cat says: ');
+}
+console.log(
+    (argv.fr ? 'miaou' : 'meow') + (argv.p ? '.' : '')
+);
+Теперь можно вызывать скрипт с разными опциями:
+
+$ ./bool.js -s
+The cat says: meow
+
+$ ./bool.js -sp
+The cat says: meow.
+
+$ ./bool.js -sp --fr
+Le chat dit: miaou.
+
+
+Можно использовать аргументы без дефиса с помощью argv._:
+
+#!/usr/bin/env node
+var argv = require('optimist').argv;
+ 
+console.log('(%d,%d)', argv.x, argv.y);
+console.log(argv._);
+Вот примеры использования:
+
+$ ./nonopt.js -x 6.82 -y 3.35 moo
+(6.82,3.35)
+[ 'moo' ]
+
+$ ./nonopt.js foo -x 0.54 bar -y 1.12 baz
+(0.54,1.12)
+[ 'foo', 'bar', 'baz' ]
+
+
+Optimist также предоставляет функции .usage() и .demand():
+
+#!/usr/bin/env node
+var argv = require('optimist')
+    .usage('Usage: $0 -x [num] -y [num]')
+    .demand(['x','y'])
+    .argv;
+ 
+console.log(argv.x / argv.y);
+Здесь параметры x и y обязательны, и если они не были переданы, будет выведена информация об использовании скрипта:
+
+$ ./divide.js -x 55 -y 11
+5
+
+$ node ./divide.js -x 4.91 -z 2.51
+Usage: node ./divide.js -x [num] -y [num]
+
+Options:
+  -x  [required]
+  -y  [required]
+
+Missing required arguments: y
+
+
+Optimist поддерживает значения параметров по умолчанию через .default():
+
+#!/usr/bin/env node
+var argv = require('optimist')
+    .default('x', 10)
+    .default('y', 10)
+    .argv
+;
+console.log(argv.x + argv.y);
+Здесь x и y по умолчанию будут равны 10:
+
+$ ./default_singles.js -x 5
+15

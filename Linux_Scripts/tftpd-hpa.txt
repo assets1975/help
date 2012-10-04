@@ -1,0 +1,22 @@
+apt-get install tftpd-hpa tftp-hpa
+
+# Нужно создать предварительно фаил и дать права
+echo "" > /srv/tftp/config.txt
+
+chmod 777 /srv/tftp/config.txt
+
+nano /etc/inetd.conf
+
+tftp     dgram  udp     wait    root    /usr/sbin/in.tftpd      /usr/sbin/in.tftpd -s /srv/tftp
+
+invoke-rc.d openbsd-inetd restart
+
+Для ограничения доступа к серверу удобно использовать /etc/hosts.allow и /etc/hosts.deny. 
+В первый вносятся адреса или подсети, которым разрешить доступ, например так:
+
+nano /etc/hosts.allow
+in.ftpd: 192.168.1.	 #разрешен доступ для подсети 192.168.1.0/24
+in.ftpd: 127.0.0.1
+
+nano /etc/hosts.deny
+in.ftpd: ALL	 #запретить доступ всем остальным

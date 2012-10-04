@@ -1,0 +1,23 @@
+apt-get install libmysqlclient-dev
+### apt-get install libmysqlclient15-dev libsnmp-dev automake libtool
+
+tar -xzvf /home/assets/cacti-spine-0.8.7i.tar.gz
+cd cacti-spine-0.8.7i
+./configure
+make
+make install
+/usr/local/spine/bin
+/usr/local/spine/etc
+
+
+# В Cacti при переходе на полер SPINE стали отваливаться хосты, причем в свойствах хоста пинги и SNMP работают, но хост всеравно в DOWN.
+Решается установкой setuid для spine.
+
+chmod u+s /usr/sbin/spine
+
+chown -R root.www-data /var/www/cacti/rra
+
+
+nano /etc/crontab
+*/5 * * * * root php /usr/share/cacti/site/poller.php >/dev/null 2>/var/log/cacti/poller-error.log
+crontab /etc/crontab

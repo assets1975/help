@@ -1,0 +1,15 @@
+<html>
+<head>
+<title>Opening and reading a file line by line</title>
+</head>
+<body>
+<?php
+$filename = "test.txt";
+$fp = fopen( $filename, "r" ) or die("Couldn't open $filename");
+while ( ! feof( $fp ) ) {
+   $line = fgets( $fp, 1024 );
+   print "$line<br>";
+}
+?>
+</body>
+</html>

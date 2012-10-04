@@ -1,0 +1,13 @@
+# /usr/bin/vboxwebsrv --background -H localhost -p 18083
+
+wget http://www.dotdeb.org/dotdeb.gpg
+cat dotdeb.gpg | sudo apt-key add -
+
+http_proxy = http://your_proxy:port   
+ftp_proxy = http://your_proxy:port   
+  
+# If you do not want to use proxy at all, set this to off.  
+use_proxy = on 
+apt-get install php5-fpm
+wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add -
+

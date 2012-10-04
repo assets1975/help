@@ -1,0 +1,59 @@
+sudo apt-get purge libapache2-mod-wsgi
+sudo apt-get install libapache2-mod-wsg
+
+sudo apt-get install libapache2-mod-wsgi
+
+
+apache2ctl -t -D DUMP_MODULES
+sudo a2enmod wsgi
+
+—оздание пользовател€ дл€ проекта
+
+ƒл€ того, чтобы изолировать код проекта от остальной системы, необходимо добавить в систему пользовател€, от имени которого будет исполн€тьс€ код проекта:
+
+# создаетс€ системна€ группа
+$ sudo addgroup --quiet --system dw
+
+# создаетс€ системный пользователь
+$ sudo adduser --quiet --system --ingroup dw --no-create-home --no-create-home dw
+–асстановка прав на директории
+
+Ќеобходимо, чтобы доступ к исходному коду имел только владелец, но при этом надо обеспечить взаимодействие с web-сервером через сокет (см. далее), а так же дать доступ к статическим файлам пользователю веб сервера. ƒл€ этого, необходимо выполнить следующее:
+
+# ”становка нового владельца проекта. √руппа пользовател€ http-сервера (www-data)
+# добавлена дл€ того, чтобы  обеспечить доступ к некоторым директори€м дл€ сервера
+$ sudo chown dw:www-data -R /home/django-projects/debianworld_ru
+
+# ”становка прав доступа на проект. „тение/запись есть только у владельца.
+# http-серверу (www-data) позвол€ем только читать
+$ sudo chmod u=rwx,g=rx,o= -R /home/django-projects/debianworld_ru
+
+# ƒоступ к исходному django-коду должен быть только у владельца
+$ sudo chmod u=rwx,g=,o= -R /home/django-projects/debianworld_ru/apps
+
+# ¬ данной директории будт находитьс€ не только логи веб-сервера, 
+# но и сокет. ѕоэтому необходимо обеспечить:
+#   * автоматическое создание сокета с группой http-сервера
+#   * возможность записи в сокет от имени пользовател€ http-сервера
+# ƒл€ этого необходимо сделать:
+#   * выставить бит sgid, чтобы файлы создавались с тойже группой, что и у директории logs
+#   * выставить доступ на запись дл€ пользовател€ http-сервера
+$ sudo chmod u=rwx,g=rwxs,o= -R /home/django-projects/debianworld_ru/logs
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+#/usr/bin/python
+# -*- coding: utf-8 -*-
+import os, sys
+import django.core.handlers.wsgi
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+sys.path.append('/usr/local/lib/python2.7/dist-packages/Django-1.4.1-py2.7.egg/django/')
+sys.path.insert(0, '/usr/local/lib/python2.7/site-packages/')
+sys.path.insert(0, '/home/assets/ftp/django-app/')
+sys.path.insert(0, '/home/assets/ftp/django-app/gpstracker')
+
+
+application = django.core.handlers.wsgi.WSGIHandler()
+--------------------------------------------------------------------------------------------------------------------------

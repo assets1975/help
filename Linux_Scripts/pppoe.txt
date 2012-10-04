@@ -1,0 +1,33 @@
+ля настройки подключения PPPoE в Debian необходимо выполнить следующие комманды:
+
+apt-get install pppoe pppoeconf
+
+В файл /etc/ppp/chap-secrets нужно добавить строку вида:
+
+“ваш_логин” * “ваш_пароль” *
+
+В файле /etc/ppp/peers/dsl-provider должен быть такой набор строк (они там все будут, кроме логина):
+
+user ваш_логин
+pty “/usr/sbin/pppoe -I eth1 -T 80 -m 1452?
+noipdefault
+defaultroute
+hide-password
+lcp-echo-interval 20
+lcp-echo-failure 3
+connect /bin/true
+noauth
+persist
+mtu 1500
+noaccomp
+default-asyncmap
+
+Внимание: Замените eth1 на имя вашей карточки (eth0, eth1).
+
+В файл /etc/network/interfaces необходимо добавить следующие строки:
+
+auto ppp0
+iface ppp0 inet ppp
+provider dsl-provider
+
+После перезагрузки системы у вас появится устройство ppp0.

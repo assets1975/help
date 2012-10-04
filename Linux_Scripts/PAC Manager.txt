@@ -1,0 +1,8 @@
+Добавить репозиторий в /etc/apt/sources.list: 
+"deb http://archive.getdeb.net/ubuntu lucid-getdeb apps".
+sudo apt-get update
+sudo apt-get install pac
+wget http://sourceforge.net/projects/pacmanager/files/pac-2.0/pac-2.5.3-all.deb/download -O pac-2.5.3-all.deb
+wget http://sourceforge.net/projects/pacmanager/files/libgnome2-vte-perl_0.09-1_i386.deb/download -O libgnome2-vte-perl_0.09-1_i386.deb
+sudo dpkg -i libgnome2-vte-perl_0.09-1_i386.deb
+sudo dpkg -i pac-2.5.3-all.deb

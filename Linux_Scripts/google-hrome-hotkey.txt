@@ -1,0 +1,2 @@
+#Google Chrome
+Горячие клавиши: Ctrl-Shift-I,Ctrl-Shift-J.

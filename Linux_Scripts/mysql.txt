@@ -1,0 +1,16 @@
+apt-get install libmysqlclient-dev    # devel pack
+mysql -uroot -p
+mysql -uroot -p cacti < /var/www/cacti/poller.php
+GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'somepassword';
+
+
+backup
+mysqldump -uroot -p cacti > /home/assets/cacti_mysql_db.sql.bakup
+
+
+mysqld --console # дл€ вы€влени€ ошибок
+
+mysqld -remove MySQL
+mysqld --install <serviseName> -defaults-file=<full path of "my.ini" file>
+#for example
+mysqld -install MySql -default-file=c:\\mysql\my.ini

@@ -1,0 +1,7 @@
+#- Modify all traffic data sources: change "Maximum Value" to 1000000000
+#  and change the "Output Type ID" to "In/Out Bits (64-bit Counters)"
+#- Change maximum values in the rrds using rrdtool:
+
+
+
+rrdtool tune <file.rrd> -a traffic_out:1.0e+09 -a traffic_in:1.0e+09

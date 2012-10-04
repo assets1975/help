@@ -1,0 +1,41 @@
+'''
+sample.ini
+
+[oracle]
+#title: The Python Standard Library
+dsn: robot/robot@cc08db
+sql: select * from robot.tbl_report_form_4_5_in t where TO_CHAR(t.\"Date\",'YYYYMMDD')=TO_CHAR(sysdate-%s,'YYYYMMDD')"
+fields : {'field':['test',1],'field2':['test_2',2]}
+
+[ematter]
+pages: 250
+
+[hardcopy]
+pages: 350
+
+'''
+
+import ConfigParser
+import string
+import ast
+
+
+config = ConfigParser.ConfigParser()
+config.read("sample.ini")
+try :
+    print config.get("oracle","sql")
+except ConfigParser.NoOptionError:
+    print "book = 0"
+
+try :
+    sfields =  config.get("oracle","fields")
+    fields = ast.literal_eval(sfields)
+    print fields
+except ConfigParser.NoOptionError:
+    print "book = 0"
+    
+    
+for section in config.sections():
+    print section
+    for option in config.options(section):
+        print " ", option, "=", config.get(section, option)

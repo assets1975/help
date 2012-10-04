@@ -1,0 +1,2 @@
+php poller_graphs_reapply_names.php -id=All
+php poller_graphs_reapply_names.php -id=5

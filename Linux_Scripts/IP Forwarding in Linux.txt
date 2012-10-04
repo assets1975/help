@@ -1,0 +1,13 @@
+#enable IP Forwarding in Linux
+cat /proc/sys/net/ipv4/ip_forward 
+0
+
+enable
+#echo 1 > /proc/sys/net/ipv4/ip_forward
+disable 
+#echo 0 > /proc/sys/net/ipv4/ip_forward
+
+
+nano /etc/sysctl.conf
+net.ipv4.ip_forward = 1 # enable ip Forwarding
+net.ipv4.ip_forward = 0 # disabled ip Forwarding

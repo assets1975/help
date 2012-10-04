@@ -1,0 +1,4 @@
+JAVA_HOME     = c:\Program Files\Java\jdk1.6.0_29\
+CATALINA_HOME = c:\Program Files\Apache Software Foundation\Tomcat 6.0\
+ANT_HOME      = c:\Program Files\apache-ant-1.8.4\
+GTS_HOME      = d:\java-app\OpenGTS_2.4.5\

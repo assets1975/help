@@ -1,0 +1,184 @@
+apt-get install vsftpd
+nano /etc/vsftpd.conf
+sudo chmod a-w /home/assets
+
+sudo mkdir /home/assets/ftp - Creates a folder named 'ftp' in the home dir of user 'john'
+
+sudo chown -Rv assets.assets /home/assets/ftp - Changes ownership of the dir to group 'john' and user 'john'.
+
+
+
+###############################################################################################################################
+Устанавливаем
+1
+ sudo apt-get install vsftpd
+#Делаем, на всякий случай, копию исходного конфига
+
+cp /etc/vsftpd.conf /etc/vsftpd.conf.default
+nano  /etc/vsftpd.conf
+1
+listen=YES
+2
+ #listen_ipv6=YES
+3
+ anonymous_enable=NO
+4
+ local_enable=YES
+5
+ write_enable=YES
+6
+ local_umask=022
+7
+ #anon_upload_enable=YES
+8
+ #anon_mkdir_write_enable=YES
+9
+ dirmessage_enable=YES
+10
+ use_localtime=YES
+11
+ xferlog_enable=YES
+12
+ connect_from_port_20=YES
+13
+ #chown_uploads=YES
+14
+ #chown_username=whoever
+15
+ #xferlog_file=/var/log/vsftpd.log
+16
+ #xferlog_std_format=YES
+17
+ #idle_session_timeout=600
+18
+ #data_connection_timeout=120
+19
+ #nopriv_user=ftpsecure
+20
+ #async_abor_enable=YES
+21
+ #ascii_upload_enable=YES
+22
+ #ascii_download_enable=YES
+23
+ #ftpd_banner=Welcome to blah FTP service.
+24
+ #deny_email_enable=YES
+25
+ #banned_email_file=/etc/vsftpd.banned_emails
+26
+ chroot_local_user=YES
+27
+ #chroot_list_enable=YES
+28
+ #chroot_list_file=/etc/vsftpd.chroot_list
+29
+ ls_recurse_enable=YES
+30
+ secure_chroot_dir=/var/run/vsftpd/empty
+31
+ pam_service_name=vsftpd
+32
+ rsa_cert_file=/etc/ssl/private/vsftpd.pem
+33
+ pasv_min_port=50000
+34
+ pasv_max_port=59000
+От конфига по умолчанию мой отличается следующим:
+Права на загружаемые файлы
+
+1
+local_umask=022
+Разрешаю локальным пользователям запись
+
+1
+write_enable=YES
+Убирал доступ для анонимных пользователей
+
+1
+anonymous_enable=NO
+Разрешил локальным пользователям логиниться (убрал комментарий в конфиге)
+
+1
+local_enable=YES
+Установил права для заливаемых файлов (убрал комментарий в конфиге)
+
+1
+local_umask=022
+Дал пользователям только его домашний каталог, домашний каталог пользователя можно посмотреть в /ets/passwd (убрал комментарий в конфиге)
+
+1
+chroot_local_user=YES
+Включил ls -R, требуется некоторым FTP клиентам, иначе будет зависать FTP передача, особенно со включенным файрволом
+
+1
+ls_recurse_enable=YES
+Указал пассивные порты
+
+1
+pasv_min_port=50000
+2
+pasv_max_port=59000
+Перезапускаем VsFTPd
+
+1
+/etc/init.d/vsftpd restart
+Список заблокированных локальных пользователей
+
+1
+root@rekka:~# cat /etc/ftpusers
+2
+ # /etc/ftpusers: list of users disallowed FTP access. See ftpusers(5).
+3
+root
+4
+ daemon
+5
+ bin
+6
+ sys
+7
+ sync
+8
+ games
+9
+ man
+10
+ lp
+11
+ mail
+12
+ news
+13
+ uucp
+14
+ nobody
+15
+ root@rekka:~#
+Чтобы у root появился доступ, надо удалить его из списка (НЕ СОВЕТУЮ)
+
+Правила для IPTABLES
+
+1
+-A INPUT -p tcp -m tcp --dport 20:21 -j ACCEPT
+2
+-A INPUT -p tcp -m tcp --dport 32768:65535 -j ACCEPT
+3
+-A INPUT -p udp -m udp --dport 32768:65535 -j ACCEPT
+Дополнительно:
+Запретить доступ к определенным типам файлов по маске
+
+1
+deny_file={*.mp3,*.mov, *.avi, .filelist}
+Скрыть определенные типы файлов при выводе списка, но дать скачать тем кто знает точное имя.
+
+1
+hide_file={*.mp3,*.mov, *.avi}
+Ограничить скорость для пользователей (байт в сек.)анонимным
+
+1
+anon_max_rate=50000
+локальным
+
+1
+local_max_rate=100000

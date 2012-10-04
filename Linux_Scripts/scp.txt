@@ -1,0 +1,8 @@
+#This is going to recursively copy all files 
+# from miguel's Home directory on 10.1.2.2 host to his Home directory in 10.1.2.3 host.
+
+scp -r miguel@10.1.2.2:/home/miguel/ miguel@10.1.2.3:/home/miguel/
+
+
+scp -r assets@192.168.5.1:/ /mnt/cacti_server_backup
+

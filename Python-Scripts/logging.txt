@@ -1,0 +1,5 @@
+import logging
+
+def main():
+   logging.basicConfig(format='%(levelname)s:"%(asctime)s" : %(message)s',filename='myapp.log', level=logging.INFO)
+   logging.info("Hello world") 

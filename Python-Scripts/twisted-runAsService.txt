@@ -1,0 +1,20 @@
+from twisted.application import service, internet
+
+
+
+
+if __name__ == '__main__':
+    from twisted.internet import reactor
+    reactor.listenTCP(1025, factory)
+    reactor.run()
+else:
+    application = service.Application("chatserver")
+    internet.TCPServer(1025, factory).setServiceParent(application)
+
+
+
+# run as service or demon
+twistd -y chatserver.py
+
+#run as application
+python chatserver.py

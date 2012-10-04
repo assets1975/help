@@ -1,0 +1,17 @@
+#Для передачи файлов по sftp можно использовать класс Transport. 
+#Для непосредственной передачи файлов используются команды put и get.
+
+host = "example.com"
+port = 22
+transport = paramiko.Transport((host, port))
+transport.connect(username='login', password='password')
+sftp = paramiko.SFTPClient.from_transport(transport)
+
+remotepath = '/path/to/remote/file.py'
+localpath = '/path/to/local/file.py'
+
+sftp.get(remotepath, localpath)
+sftp.put(localpath, remotepath)
+
+sftp.close()
+transport.close()

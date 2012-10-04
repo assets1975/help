@@ -1,0 +1,22 @@
+adduser --disabled-password --disabled-login --no-create-home cactiuser
+
+chown -R cactiuser /var/www/cacti/rra /var/www/cacti/log/
+chown -R cactiuser /var/www/cacti/poller.php
+
+crontab -l
+nano /etc/crontab
+*/5 * * * * cactiuser php /var/www/cacti/poller.php > /dev/null 2>&1
+
+
+
+# check 64bit oid
+snmpwalk -v 2c -c metro 10.245.152.5 1.3.6.1.2.1.31.1.1.1.6
+
+#ifHCInOctets (.1.3.6.1.2.1.31.1.1.1.6)	
+#ifHCOutOctets (1.3.6.1.2.1.31.1.1.1.10)
+#ifHCInUcastPkts (.1.3.6.1.2.1.31.1.1.1.7)	
+#ifHCOutUcastPkts (.1.3.6.1.2.1.31.1.1.1.11)
+#ifHCInMulticastPkts (.1.3.6.1.2.1.31.1.1.1.8)	
+#ifHCOutMulticastPkts (.1.3.6.1.2.1.31.1.1.1.12)
+#ifHCInBroadcastPkts (.1.3.6.1.2.1.31.1.1.1.9)	
+#ifHCOutBroadcastPkts (.1.3.6.1.2.1.31.1.1.1.13)

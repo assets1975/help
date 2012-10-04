@@ -1,0 +1,7 @@
+>>> d = dict(one=1, two="three", question="life, universe, and everything")
+>>> import simplejson
+>>> s = simplejson.dumps(d)
+>>> s
+'{"question": "life, universe, and everything", "two": "three", "one": 1}'
+>>> simplejson.loads(s) == d
+True

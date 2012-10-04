@@ -1,0 +1,2 @@
+sudo apt-get install idle idle-python2.6 (для старых версий python)
+sudo apt-get install idle3 (для тех, у кого установлен python3)

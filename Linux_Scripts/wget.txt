@@ -1,0 +1,6 @@
+
+http_proxy = http://your_proxy:port   
+ftp_proxy = http://your_proxy:port   
+  
+# If you do not want to use proxy at all, set this to off.  
+use_proxy = on 

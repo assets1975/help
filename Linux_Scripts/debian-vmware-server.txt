@@ -1,0 +1,26 @@
+aptitude install linux-headers-`uname -r` build-essential xinetd gcc-4.1
+tar xvfz VMware-server-*.tar.gz
+cd vmware-server-distrib
+CC=/usr/bin/gcc-4.1 ./vmware-install.pl
+cd /home/admin
+rm -f VMware-server*
+rm -fr vmware-server-distrib/
+проверяем свой VMware Server, заходим браузером по адресу http://<ip адрес сервера>:8222 или https://<ip адрес сервера>:8333, по умолчание для входа используется системный пользователь root.\
+
+
+Попробуйте так:
+
+ln -sf /usr/bin/gcc-4.1 /usr/bin/gcc
+
+./vmware-install.pl
+
+http://www.howtoforge.com/how-to-install-vmware-server-2-on-debian-lenny
+
+
+https://www.vmware.com/tryvmware/p/activate.php?p=server20
+Licensing
+
+VMware Server for Windows	A2H0D-PR42T-19293-415LR
+VMware Server for Linux		A842X-PRH2W-0C394-49QJN
+
+

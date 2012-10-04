@@ -1,0 +1,5 @@
+import ast
+ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
+
+
+ast.literal_eval("{'muffin' : ['lolz','asas',], 'foo' : ['kitty','asasasa']}")

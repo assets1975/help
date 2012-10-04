@@ -1,0 +1,8 @@
+allow-hotplug eth2
+iface eth2 inet static
+        address 10.170.2.98
+        netmask 255.255.255.0
+        gateway 10.170.2.254
+        nameserver 10.170.2.1
+        up route add -net 10.170.5.0 netmask 255.255.255.0 gw 10.170.2.254
+        up route add -net 10.170.137.0 netmask 255.255.255.0 gw 10.170.2.254

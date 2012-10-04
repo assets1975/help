@@ -1,0 +1,38 @@
+sudo apt-get install build-essential libssl-dev curl git-core
+
+#ƒа, она ставитьс€ очень просто:
+#1. —тавим node.js;
+   	git clone git://github.com/joyent/node.git
+	
+	cd node 	
+	git checkout v0.6.16
+	
+	./configure
+	make
+	make install
+	node --version
+	
+	NPM install
+	curl http://npmjs.org/install.sh | sh
+	curl http://npmjs.org/install.sh | sh
+
+
+#2.  лонируем репозиторий git clone github.com/ajaxorg/cloud9.git;
+
+	git clone git://github.com/ajaxorg/cloud9.git
+	git checkout v1.7.1 если нужно выбрать версию
+	npm install -g sm
+	sm install
+	
+	chown -R assets:assets /home/assets/cloud9/
+	su assets
+	mkdir /home/assets/workspace
+	cloud9/bin/cloud9.sh -l 192.168.1.5 -w /home/assets/workspace/
+
+3. ¬ директории bin запускаем cloud9.sh, во врем€ первого запуска он выкачает зависимости и настроит себ€;
+4. ѕо умолчанию он запускаетс€ на 127.0.0.1 на порту 3000
+5. „тобы указать путь к исходникам и другой интерфейс используем параметры.
+
+я запускаю его вот таким скриптом:
+#!/bin/bash
+/home/cloud9/bin/cloud9.sh -l 0.0.0.0 -w /home/workspace > /dev/null 2> /dev/null

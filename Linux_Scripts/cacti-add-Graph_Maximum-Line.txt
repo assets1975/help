@@ -1,0 +1,58 @@
+1) Create a special CDEF
+- Log in to Cacti as admin.
+- Go to the "Console" tab
+- Choose "Graph Magement" from the left menu
+- Choose "CDEFs" from the left menu
+- Click "Add" on the right top of the page
+- Enter the name: "Graph Maximum Line"
+- Click "Create"
+- Click "Add" right on the page
+- Choose "Special Data Source" 
+- Choose "All Data Sources (Don't include Duplicates)"
+- Click "Create"
+- Click "Add" right on the page
+- Choose "Custom String"
+- Enter "0"
+- Click "Create"
+- Click "Add" right on the page
+- Choose "Operator" and " * " (star = multiply)
+- Click "Create"
+- Click "Add" right on the page
+- Choose "Special Data Source" and "Graph: Upper Limit"
+- Click "Create"
+- Click "Add" right on the page
+- Choose "Operator" and " + "
+- Click "Create"
+- Click "Save"
+This is what it should look like:
+#######################################################################
+2) Add the the line to the Graph Template
+- Choose "Graph Templates" from the left menu"
+- Click the tempate you wish to add the black maximum line to
+- Click "Add" on the right top of the page
+- Set the "Data Source" to "none" (the first option)
+- Set the "Color" to 000000 / Black (the last option)
+- Set the "Graph Item Type" to "LINE1"
+- Set the "CDEF function" to the "Graph Maximum Line" you created
+- Click "Create"
+This is what the settings look like:
+#######################################################################
+3) Set a "Upper Limit" for the graph
+You can set an upper limit for all the graphs based on a graph template, or you can set it per host. 
+- Click "Graph Templates" from the left menu
+- Click the graph you want to set the maximum for
+- Scoll the page down to the options
+- "Auto Scale" should be set off
+- "Auto Scale Options" should be set to "Use --alt-autoscale-max (accepting a lower limit)"
+- Set the "Upper Limit" to the number you want the graph to scale to by default, for example "4" or "8" for a load graph and "104857600" for a 100 mbit network graph. 
+- If you want to set an upper limit per separate host, you need to check the checkbox "Use Per-Graph Value" below "Upper Limit"
+- Click "Save"
+These are my settings:
+########################################################################
+f you have choosen "Use Per-Graph Value", you can set the per-host value this way:
+-Choose "Graph Management" for the left menu
+- Click the graph
+- Set the "Upper Limit"
+- Click "Save"
+
+Repeat this for all of your hosts. 

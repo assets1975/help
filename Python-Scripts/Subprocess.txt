@@ -1,0 +1,7 @@
+from subprocess import call,Popen,PIPE
+
+p =  Popen(["mycmd", "myarg"], bufsize=2048, shell=True,stdin=PIPE, stdout=PIPE, close_fds=False)
+p.wait()
+p.stdout.read()
+
+

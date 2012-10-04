@@ -1,0 +1,7 @@
+# Ќужно указать правельное количество process и threads
+#рекомендуемый в зависимости от процессора
+#   The rule of thumb is to use processes <= 1-2 number of cores and threads between 10 and 15.
+http://forums.cacti.net/about38655.html
+
+processes <= 1-2
+threads between 10 and 15

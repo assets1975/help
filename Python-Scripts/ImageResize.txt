@@ -1,0 +1,11 @@
+# -*- coding: cp1251 -*-
+import os,sys
+from PIL import Image
+
+
+
+if __name__ == "__main__":
+    
+    image = Image.open("DSC00648.jpg")
+    image.thumbnail((1024, 768), Image.ANTIALIAS)   
+    image.save("d.jpg", quality=80)

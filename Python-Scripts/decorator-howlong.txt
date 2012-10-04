@@ -1,0 +1,12 @@
+import time
+
+def howlong(f):
+    '''
+     decorator howlong
+    '''
+    def tmp(*args, **kwargs):
+        t = time.time()
+        res = f(*args, **kwargs)
+        print "time: %f" % (time.time()-t)
+        return res
+    return tmp

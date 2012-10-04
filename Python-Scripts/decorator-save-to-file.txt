@@ -1,0 +1,11 @@
+import sys
+
+def decorator(n):
+	def out_changer(f):
+		sys.stdout = open(n,"w+")
+		def res_func(*args,**kwargs):
+			return f(*args,**kwargs)
+		return res_func
+	return out_chenger
+
+

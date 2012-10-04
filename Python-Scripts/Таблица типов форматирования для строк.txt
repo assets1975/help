@@ -1,0 +1,17 @@
+Код	Значение
+s	Строковый
+r	Строковый, но с использованием repr, а не str
+c	Посимвольный
+d	Десятичный
+i	Целый
+u	То же, что и d (no longer unsigned)
+o	Восьмеричный
+x	Шестнадцатеричный
+X	Шестнадцатеричный в верхнем регистре
+e	Floating-point exponent, нижний регистр
+E	То же, что и e, но в верхнем регистре
+f	Floating-point decimal
+F	Floating-point decimal
+g	Floating-point e или f
+C	Floating-point E или F
+%	Символьный %

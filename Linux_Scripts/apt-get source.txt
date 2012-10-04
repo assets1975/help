@@ -1,0 +1,3 @@
+# скачать исходник deb пакета
+cd /root
+apt-get source packege_name

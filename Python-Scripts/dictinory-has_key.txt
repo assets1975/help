@@ -1,0 +1,2 @@
+users = {}
+users.has_key("assets")

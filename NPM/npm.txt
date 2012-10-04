@@ -1,0 +1,37 @@
+###из Git
+workon myenv
+git&clone&git://github.com/isaacs/npm.git
+cd npm
+make&
+make&install&
+#################################################
+
+
+#Установка npm
+curl http://npmjs.org/install.sh | sh
+
+#Обновление npm
+#Есть несколько способов чтобы обновить npm. Я предпочитаю:
+curl http://npmjs.org/install.sh | sh
+#или
+npm install npm -g
+
+#Поиск пакетов в npm
+npm search hook.io
+
+#Просмотр информации о пакете
+npm view hook.io
+
+#Локальная установка пакетов
+npm install http-server
+
+
+#Установка пакета в наше приложение
+mkdir mynewapp/
+  cd mynewapp
+  npm install http-server
+  touch test.js
+
+.npmrc
+proxy = http://ASaparov:qqh975@proxy.semsk.tcom:8080/
+https-proxy = http://ASaparov:qqh975@proxy.semsk.tcom:8080

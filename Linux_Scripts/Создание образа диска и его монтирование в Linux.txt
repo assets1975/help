@@ -1,0 +1,6 @@
+#Для того, чтобы создать образ компакт-диска, выполните команду:
+dd if=/dev/dvd of=filename.iso
+
+#Для монтирования образа диска, выполните:
+sudo mkdir /media/image
+sudo mount -o loop filename.iso /media/image

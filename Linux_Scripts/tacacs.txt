@@ -1,0 +1,51 @@
+wget -c ftp://ftp.shrubbery.net/pub/tac_plus/tacacs+-F4.0.4.25.tar.gz
+wget -c ftp://ftp-eng.cisco.com/pub/tacacs/tac_plus.F4.0.4.alpha.tar.Z
+
+
+tar xvf tac_plus.F4.0.4.alpha.tar.Z
+
+
+netstat -tulpen | grep tac_plus
+tail -f /var/log/messages
+tcpdump -i eth0 tcp port 49
+
+
+Files
+
+/var/log/tac-plus/account.log (must make this file writable)
+/var/tmp/tac_plus.log (service logfile)
+/etc/init.d/tac-plus (startup script)
+/etc/tac-plus/tacacs.conf (users and global settings)
+/usr/sbin/tac_plus (executable)
+
+create des encrypted password: htpasswd -n debianhelp
+ 
+Server Config file
+ 
+/etc/tac-plus/tacacs.conf
+
+htpasswd -n username
+
+#This user can do anything
+
+user = admins {
+    default service = permit
+    login = des 70e4lCVGyWSKM
+              }
+
+#this user can only run 'show ip' and ‘show interface’ commands
+
+user = users {
+    default service = deny
+    login = cleartext test
+        cmd = show
+                {
+                permit ip
+                permit interface
+                deny .*
+                }
+            } 
+
+
+--------------------
+apt-get install flex bison libwrap0-dev

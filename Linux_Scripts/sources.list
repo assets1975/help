@@ -1,0 +1,14 @@
+# deb http://mirror.neolabs.kz/debian/ squeeze main
+
+deb http://mirror.neolabs.kz/debian/ squeeze main
+deb-src http://mirror.neolabs.kz/debian/ squeeze main
+
+deb http://security.debian.org/ squeeze/updates main
+deb-src http://security.debian.org/ squeeze/updates main
+
+# squeeze-updates, previously known as 'volatile'
+deb http://mirror.neolabs.kz/debian/ squeeze-updates main
+deb-src http://mirror.neolabs.kz/debian/ squeeze-updates main
+
+deb http://download.virtualbox.org/virtualbox/debian squeeze contrib non-free
+deb http://packages.dotdeb.org squeeze all

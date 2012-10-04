@@ -1,0 +1,9 @@
+apt-get install tftpd tftp
+nano /etc/inetd.conf
+tftp		dgram	udp	wait	nobody	/usr/sbin/tcpd	/usr/sbin/in.tftpd /srv/tftp
+
+mkdir -p /srv/tftp && chown nobody /srv/tftp
+#Теперь нам нужно протестировать наш сервер. Для этого создадим тестовый файл в корне сервера
+echo Test File > /srv/tftp/test && chown nobody /srv/tftp/test
+И попробуем его скачать:
+echo get test | tftp 127.0.0.1

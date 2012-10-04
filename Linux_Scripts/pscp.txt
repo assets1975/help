@@ -1,0 +1,6 @@
+-ls list remote files
+pscp.exe -ls assets@192.168.5.1:/home/
+
+
+
+c:\Program Files\PuTTY>pscp.exe -r assets@192.168.5.1:/etc "d:\Backup\cacti_server_lnux\."

@@ -1,0 +1,1 @@
+adduser --disabled-password --disabled-login ----no-create-home cactiuser

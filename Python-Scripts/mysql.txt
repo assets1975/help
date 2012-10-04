@@ -1,0 +1,19 @@
+import MySQLdb
+
+   conn = MySQLdb.connect (host = "localhost",
+                           user = "testuser",
+                           passwd = "testpass",
+                           db = "test")
+   cursor = conn.cursor ()
+   cursor.execute ("SELECT VERSION()")
+   row = cursor.fetchone ()
+   print "server version:", row[0]
+   cursor.close ()
+   conn.close ()
+
+-----------------------------------------------
+cursor.execute ("SELECT name, category FROM animal")
+   rows = cursor.fetchall ()
+   for row in rows:
+     print "%s, %s" % (row[0], row[1])
+   print "Number of rows returned: %d" % cursor.rowcount

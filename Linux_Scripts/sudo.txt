@@ -1,0 +1,3 @@
+apt-get install sudo
+nano /etc/sudores
+asset ALL=(ALL) ALL

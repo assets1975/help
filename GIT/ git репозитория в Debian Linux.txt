@@ -1,0 +1,16 @@
+sudo aptitude install gitosis git-core
+
+
+sudo apt-get install python-setuptools
+git clone git://github.com/tv42/gitosis.git
+cd gitosis
+python setup.py install
+
+groupadd -r git
+useradd -r -d /git -g git -m -s /bin/bash git
+ssh-keygen -t rsa
+
+
+
+#Следующим шагом надо создать gitosis хостинг:
+sudo -H -u git gitosis-init < .ssh/authorized_keys2

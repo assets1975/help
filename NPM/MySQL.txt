@@ -1,0 +1,27 @@
+npm install mysql@2.0.0-alpha2
+
+// Создаем соединение.
+// Настройки по умолчанию должны быть изменены в соответсвии с настройками mysql.
+var connection = mysql.createConnection({
+	user: "root",
+	password: "",
+	database: "db_name"
+});
+
+// Создаем http сервер.
+http.createServer(function (request, response) {
+	// Добавляем обработчик события.
+	request.on('end', function () {
+	// Запрос к базе данных.
+	connection.query('SELECT * FROM your_table;', function (error, rows, fields) {
+		response.writeHead(200, {
+			'Content-Type': 'x-application/json'
+		});
+		// Отправляем данные в json формате.
+		// Строки переменной содержат результат запроса.
+		response.end(JSON.stringify(rows));
+	});
+});
+// Слушаем 8080 порт.
+
+node mysql.js

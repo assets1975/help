@@ -1,0 +1,30 @@
+ipconfig /all				#Отображает полную информацию о сетевых адаптерах.
+ipconfig /displaydns			#
+netstat -nabo				#Отображает все сетевые ТСР/UОР-соединения. 
+					# Ключ « -Ь » позволяет сразу получить еще и име н а п ро цессов,
+					# которыми эти соединения были установлены, однако эта команда 
+					# требует администраторских прав .
+netstat -s -p[tcp|udp|icmp|ip]		#
+netstat -г				#
+route print				#
+netstat -па 1 findstr :445		#Вот таким образом можно посмотреть, какие соединения установл на портах, 
+					# содержащих значения 445.
+net view				# С помощью этой команды через SMB можно найти всехостыв текущей рабочей группе [домене}
+net accounts
+net accounts /domain
+net localgroup administrators
+net localgroup administrators /domain
+net config workstation
+net share
+arp -a
+type %WINDIR%\System32\drivers\etc\hosts
+whoami					# Это команда отображает текущего пользователя и домен.
+whoami /all				#
+qwinsta 				#Чтобы узнать об активных RОР-сессиях
+ver
+set
+systeminfo
+qprocess *
+qappsrv
+
+

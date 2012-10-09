@@ -1,0 +1,76 @@
+#—оздаЄм свой git репозитарий с веб интерфейсом
+
+sudo aptitude install git-core perl perl-base perl-modules lighttpd
+sudo adduser git
+su git
+cd ~
+mkdir .ssh/
+cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys
+
+# “еперь необходимо создать директорию дл€ проектов, и инициализировать там репозиторий:
+
+mkdir -p /opt/git/project.git
+cd /opt/git/project.git
+git --bare init
+
+# ¬ папке /opt/git/, наход€тс€ все проекты. 
+# „тобы создать новый проект, нужно создать в этой директории ещЄ одну директорию, 
+# и инициализировать репозиторий командой git --bare init.
+
+#  стати, всЄ манипул€ции что были выше, необходимо производить от пользовател€ git. 
+# –азве что заведомо создать директорию /opt/git 
+# с правами записи дл€ пользовател€ git, и группы www-data (веб сервер).
+
+# ‘актически, репозиторий уже работает. ѕроверим это:
+
+mkdir project
+cd project
+git init
+touch README
+git add README
+git commit -m 'First commit'
+git remote add origin git@git.yourserver.com:/opt/git/project.git
+git push origin master
+
+# ћожно проверить просто сделав git clone git@yourcite.ru:/opt/git/project.git
+
+# “еперь осталось настроить gitweb, и lighttpd дл€ работы с ним.
+
+cd /tmp
+git clone git://git.kernel.org/pub/scm/git/git.git
+cd git/
+make GITWEB_PROJECTROOT="/opt/git" \
+        prefix=/usr gitweb/gitweb.cgi
+sudo cp -Rf gitweb /var/www/www.yourcite.com/html
+sudo chown -Rc git:www-data /var/www/www.yourcite.com/html
+
+# Ётими действи€ми, мы скачаем последнюю версию gitweb 
+# (с той версией что в репозитарии, у мен€ как-то не сложилось), 
+# соберЄм, и скопируем полученное в папку с сайтом. ” мен€ это git.the-bosha.ru 
+# (можете не пытатьс€ открыть, он за натом :) ).
+# ќсталось добавить gitweb.cgi в index.file_names в /etc/lighttpd/lighttpd.conf
+
+## files to check for if .../ is requested
+index-file.names           = ( "index.php", "index.html",                                              
+                                "index.htm", "default.htm",
+                                "index.lighttpd.html", "gitweb.cgi" )
+
+#я сделал именно так, потому что не хотел чтобы случайно, 
+#непон€тно как попавшие скрипты на сервер выполн€лись. 
+# “еперь перезапустим сервер:
+
+sudo /etc/init.d/lighttpd force-reload
+
+
+
+
+
+
+
+
+
+
+
+
+
+

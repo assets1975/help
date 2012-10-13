@@ -1,0 +1,2 @@
+#определени€ количества подключений к порту
+netstat -plan | grep :80 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -n

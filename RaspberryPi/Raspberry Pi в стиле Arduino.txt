@@ -1,0 +1,79 @@
+# Raspberry Pi в стиле Arduino
+# http://robocraft.ru/blog/ARM/952.html
+
+# Python
+# ƒл€ работы на ѕитоне используетс€ модуль RPi.GPIO:
+# url http://pypi.python.org/pypi/RPi.GPIO
+
+Python
+	import RPi.GPIO as GPIO
+	GPIO.setup(7, GPIO.OUT)
+	GPIO.output(7, True)
+	GPIO.output(7,False)
+Bash
+	# под root-ом.
+	sudo su -
+
+	# запись:
+	echo "4" > /sys/class/gpio/export
+	echo "4" > /sys/class/gpio/export
+	echo "out" > /sys/class/gpio/gpio4/direction
+	echo "1" > /sys/class/gpio/gpio4/value
+	echo "0" > /sys/class/gpio/gpio4/value
+
+	# чтение:
+	echo "0" > /sys/class/gpio/export
+	echo "in" > /sys/class/gpio/gpio0/direction
+	cat /sys/class/gpio/gpio0/value
+C
+# ƒл€ простоты, можно использовать библиотеку, 
+# реализующую методы а-л€ Arduino Ч wiringPi.
+
+#”становка:
+	cd /tmp
+	wget http://project-downloads.drogon.net/files/wiringPi-1.tgz
+	tar xfz wiringPi-1.tgz
+	cd wiringPi/wiringPi
+	make
+	sudo make install
+
+#тестовый blink.c
+	/*
+	 * blink.c:
+	 *      Simple test program to blink an LED on pin 7
+	 */
+
+	#include <wiringPi.h>
+	#include <stdio.h>
+
+	int main (void)
+	{
+	  int pin = 7;
+	  printf("Raspberry Pi wiringPi blink test\n");
+	
+	  if (wiringPiSetup() == -1)
+	    exit (1);
+	
+	  pinMode(pin, OUTPUT);
+	
+	  for (;;){
+	    printf("LED On\n");
+	    digitalWrite(pin, 1);
+	    delay(250);
+	    printf("LED Off\n");
+	    digitalWrite(pin, 0);
+	    delay(250);
+	  }
+
+	  return 0;
+	}
+# остаЄтс€ собрать и запустить:
+
+cc -o blink blink.c -L/usr/local/lib -lwiringPi
+sudo ./blink
+
+
+
+
+
+

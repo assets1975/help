@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+try:
+    from ve_setup import use_virtualenv
+except ImportError:
+    import urllib
+    urllib.retrive("http://tiny.cc/ve-setup", 've_setup.py')
+    from ve_setup import use_virtualenv
+use_virtualenv(['--distribute', "python"], requirements="requirements.pip", activate=True)
+
+# application code
+from django.core.management import execute_manager

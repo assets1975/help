@@ -1,0 +1,11 @@
+var socket = new WebSocket("ws://example.com:8081/");
+
+socket.onopen = function () {
+    console.log("Opened");
+};
+socket.onclose = function () {
+    console.log("Closed");
+};
+socket.onmessage = function (event) {
+    console.log("Received:", event.data);
+};

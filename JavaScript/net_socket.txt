@@ -1,0 +1,13 @@
+var net = require('net');
+var client = net.connect(1234, function(){
+   client.on('data', function(data) {
+     console.log('data:', data.toString());
+   });
+
+   client.on('error', function(err) {
+     console.log('error:', err.message);
+   });
+
+   client.write('command1\n');
+   client.write('command2\n');
+});

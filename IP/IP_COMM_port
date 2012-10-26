@@ -1,0 +1,108 @@
+Вопрос ведь звучал "SLIP и PPP сокеты В ПРОГРАММАХ НА C" , 
+вот и решил - надо дописать , раз уж взялся . 
+Вешаю 2 slip-интерфейса на 2 USB-RS232-переходника , 
+настраиваю ip на "192.168.5.1" и "192.168.5.2" . 
+Пингую - пинг есть до обоих . 
+===============================
+slattach -dv -p slip -s 9600 /dev/ttyUSB0 &
+slattach -dv -p slip -s 9600 /dev/ttyUSB1 &
+ifconfig sl0 192.168.5.1
+ifconfig sl1 192.168.5.2
+===============================
+Дальше код на C : 
+===============================
+#define _BSD_SOURCE || _SVID_SOURCE //feature test macro requirement for glibc for inet_aton() .
+#include <sys/poll.h> //poll ...
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h> //inet_aton ...
+#include <stdio.h>    //perror
+#include <stdlib.h> //exit ...
+
+#define RECEIVE_FLAGS 0
+#define SEND_FLAGS 0
+#define HOST_ADDRESS "192.168.5.1"
+#define RCVR_ADDRESS "192.168.5.2"
+
+char message[] = "F_Message";
+char buffer[1024];
+
+int snd_error(int exit_code,char *msg)
+{
+    perror(msg);
+    exit(exit_code);
+};
+
+void *recvall(int rcvr, struct sockaddr_in *addr, void *buf, int len) //receiving all the data array , a parts.
+{
+    int rcvd = 0;
+    void *bufcpy = buf;
+    socklen_t addrlen = (socklen_t)sizeof(*addr);
+    while(len)
+    {
+        rcvd = recvfrom(rcvr,buf,len,RECEIVE_FLAGS,(struct sockaddr *)addr,&addrlen);
+        if(-1 == rcvd)
+            snd_error(4,"in funktion recvall , recvfrom : ");
+        len -= rcvd;
+        buf += rcvd;
+    }
+    return bufcpy;
+};
+
+void sendall(int sndr, struct sockaddr_in *addr, void *msg, int len) //sending all the data array , a parts
+{
+    int sendd = 0;
+    socklen_t addrlen = (socklen_t)sizeof(*addr);
+    while(len)
+    {
+        sendd = sendto(sndr,msg,len,SEND_FLAGS,(struct sockaddr *)addr,addrlen);
+        if(-1 == sendd)
+            snd_error(5,"in funktion sendall , sendto : ");
+        len -= sendd;
+        msg += sendd;
+    }
+};
+
+int main(int argc , char *argv[])
+{
+
+    int HOST_SOCK,RCVR_SOCK; //in upper case for highlihting .
+    struct sockaddr_in host_addr;
+    struct sockaddr_in rcvr_addr;
+
+    HOST_SOCK = socket(AF_INET,SOCK_DGRAM,0);
+    if(HOST_SOCK<0)
+        snd_error(1,"in funktion main , socket : ");
+
+    RCVR_SOCK = socket(AF_INET,SOCK_DGRAM,0);
+    if(RCVR_SOCK<0)
+        snd_error(2,"in funktion main , socket : ");
+
+    host_addr.sin_family = AF_INET;
+    host_addr.sin_port = htons(3000);
+    if(0 == inet_aton(HOST_ADDRESS,&(host_addr.sin_addr)))
+        snd_error(2,"in funktion main , inet_aton : ");
+
+    if(-1 == bind(HOST_SOCK,(struct sockaddr *)&host_addr,sizeof(host_addr)))
+        snd_error(3,"in funktion main , bind : ");
+
+    rcvr_addr.sin_family = AF_INET;
+    rcvr_addr.sin_port = htons(3000);
+    if(0 == inet_aton(RCVR_ADDRESS,&(rcvr_addr.sin_addr)))
+        snd_error(6,"6 in funktion main , inet_aton : ");
+
+    if(-1 == bind(RCVR_SOCK,(struct sockaddr *)&rcvr_addr,sizeof(rcvr_addr)))
+        snd_error(4,"in funktion main , bind : ");
+
+    sendall(HOST_SOCK,&rcvr_addr,message,sizeof(message));
+    recvall(RCVR_SOCK,&host_addr,buffer,sizeof(message));
+    printf("%s\n",buffer);
+
+    return 0;
+};
+===============================
+$./a.out
+F_Message
+===============================
+При извлечении любого из переходников программа выдаёт ошибки при вызове bind и данные не проходят . Что свидетельствует о передаче пакетов именно по проводу :) 

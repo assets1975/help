@@ -106,3 +106,37 @@ $./a.out
 F_Message
 ===============================
 При извлечении любого из переходников программа выдаёт ошибки при вызове bind и данные не проходят . Что свидетельствует о передаче пакетов именно по проводу :) 
+
+
+
+
+Вчера попинговал свой USB-RS232 переходничок : 
+================================
+slattach -dm -p slip -s 9600 /dev/ttyUSB0 &
+================================
+slattach: tty_open: looking for lock
+slattach: tty_open: trying to open /dev/ttyUSB0
+slattach: tty_open: /dev/ttyUSB0 (fd=3) slip started on /dev/ttyUSB0 interface sl0
+slattach: tty_set_speed: 0
+================================
+ifconfig sl0 192.168.5.1
+ifconfig sl0 
+================================
+sl0       Link encap:Serial Line IP  
+          inet addr:192.168.5.1  P-t-P:192.168.5.1  Mask:255.255.255.255
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:296  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:10 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+================================
+ping 192.168.5.1
+================================
+PING 192.168.5.1 (192.168.5.1) 56(84) bytes of data.
+64 bytes from 192.168.5.1: icmp_req=1 ttl=64 time=0.034 ms
+64 bytes from 192.168.5.1: icmp_req=2 ttl=64 time=0.033 ms
+64 bytes from 192.168.5.1: icmp_req=3 ttl=64 time=0.039 ms
+64 bytes from 192.168.5.1: icmp_req=4 ttl=64 time=0.035 ms
+--- 192.168.5.1 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 2999ms
+rtt min/avg/max/mdev = 0.033/0.035/0.039/0.004 ms

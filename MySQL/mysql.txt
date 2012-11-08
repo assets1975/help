@@ -1,1 +1,34 @@
 SELECT * FROM table LIMIT 5,10;
+
+1- Пример как востоновить пороль
+----------------------------------------------------------------------------------------------------
+Останавливаем сервер MySQL и пробуем запустить mysqld без применения привелегий:
+$ sudo /etc/init.d/mysql stop
+$ mysqld --skip-grant-tables --skip-networking
+
+После чего обновляем пароль для пользователя root:
+$ mysql -uroot
+mysql> UPDATE `mysql`.`user` SET `password`=PASSWORD('YOUR_NEW_PASSWORD') WHERE `user`="root";
+mysql> FLUSH PRIVILEGES;
+
+Запускаем MySQL-сервер:
+$ sudo /etc/init.d/mysql start
+----------------------------------------------------------------------------------------------------
+# Второй вариант
+#  Если не получается по вервому варианту получить доступ к mysql, 
+#  то мне помогает вариант с загрузкой init-скрипта, в котором будет происходит смена пароля для пользователя root.
+
+Останавливаем MySQL-сервер и создаем файл "~/init.sql":
+
+$ sudo /etc/init.d/mysql stop
+$ nano ~/init.sql
+Со следующим содержимым:
+
+UPDATE `mysql`.`user` SET `password`=PASSWORD('YOUR_NEW_PASSWORD') WHERE `user`='root';
+FLUSH PRIVILEGES;
+После чего запускаем mysqld_safe, прерываем его и запускаем MySQL-сервер:
+
+$ mysqld_safe --init-file=~/init.sql
+$ sudo /etc/init.d/mysql start
+Эти два варианта всегда работают, удачи!
+

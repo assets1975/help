@@ -1,0 +1,852 @@
+Marley
+15.03.2010, 11:39
+// Резервное копирование и восстановление данных (Команды RMAN)
+
+
+FRA - Fast Recovery Area - область на диске для бекапов и архивных журналов
+RMAN - Recovery Manager (утилита для резервного копирования и восстановление данных)
+
+
+
+В большинстве случаев, рекомендуется настроить работу базы данных в режиме работы ARCHIVELOG.
+ARCHIVELOGи и BACKUPы хранятся в FRA, необходимо, чтобы база данных имела возможность записи данных в эту область, иначе возникнет ошибка и база перестанет принимать команды пользователей. Поэтому, по мере заполенения FRA, необходимо ее очищать (исключительно средствами RMAN).
+
+
+Посмотреть данные FRA:
+
+select ROUND((SPACE_USED)/1024/1024/1024) "Used GB", ROUND((SPACE_LIMIT)/1024/1024/1024) "MAX GB", ROUND(((SPACE_LIMIT)-(SPACE_USED))/1024/1024/1024) "FREE GB" 
+from V$recovery_File_Dest;
+
+
+
+Restore - выполняется копирование файлов из резервной копии. Поврежденные файлы заменяются на рабочие из бекапа. (Чаще всего это несколько устаревшие данные)
+Recover - процесс применения журналов к базе данных для наката ее вперед до определенного времени, точки восстановления и д.р.
+
+EXPIRED (Истекшие) - это файлы, статус который в репозитории RMAN - EXPIRED. RMAN маркирует бекапы и копии данных как expired в случае, если при запуске CROSSCHECK будут найдены ссылки на отсутсвующие или недоступные файлы.
+OBSOLETE (Устаревшие) - бекапы и копии данных в репоризотории RMAN, помеченные как obsolete. Они больше ненужны, их можно удалить средствами RMAN. 
+
+
+================
+
+Если по-простому, чтобы иметь возможность восстановить работу базы данных в случае сбоя нужно знать следующие команды.
+
+Создание резервной копии базы данных
+
+
+
+
+// Подключение к базе данных
+CMD> rman target /
+
+// Создание резервной копии 
+RMAN> backup database;
+
+
+
+
+// Восстановление базы данных
+
+
+
+RMAN> rman target /
+
+// Восстановление базы из резервной копии на момент создания бекапа
+RMAN> restore database;
+
+// Применение (если нужно) архивных журналов к восстановленной базе данных
+RMAN> recover database;
+
+
+
+
+
+
+Все остальное - частные случаи !!!
+Разумеется для баз данных, более критичных для организации, необходимо дополнительное планирование систем резервного копирования и восстановления после сбоев. 
+
+================
+
+
+// Режим работы БД
+
+
+
+select db_unique_name, log_mode, flashback_on from v$database; -- уникальное имя БД, режим работы БД (archivelog / noarchivelog), flashback (on, off)
+
+
+
+
+
+
+DB_UNIQUE_NAME LOG_MODE FLASHBACK_ON
+------------------------------ ------------ ------------------
+ora112 ARCHIVELOG NO
+
+
+
+------------------------------------
+
+// Основные представления:
+
+select * from v$database; -- 
+select * from v$recovery_file_dest; -- месторасположение FRA. 
+select * from v$flash_recovery_area_usage; -- использованный объем
+select * from v$rman_backup_job_details; -- информация по бекапам
+select * from v$rman_backup_subjob_details;
+select * from v$rman_configuration; -- 
+select * from v$rman_status;
+select * from v$rman_backup_type;
+
+
+
+select * from v$rman_configuration;
+
+select * from v$archived_log;
+
+select * from v$backup_corruption;
+select * from v$copy_corruption;
+
+select * from v$backup_files;
+select * from v$backup_device;
+select * from v$backup_set;
+select * from v$backup_piece;
+select * from v$backup_redolog;
+select * from v$backup_spfile;
+
+
+// Изменить расположение flash_recovery_area
+SQL> alter system set db_recovery_file_dest="D:\_backups\_Oracle\DB_RECOVERY_FILE_DEST";
+
+
+// Установить предельный размер flash_recovery_area
+SQL> alter system set db_recovery_file_dest_size = 60G;
+
+
+// Влючить flashback (если выключен)
+
+SQL> shutdown immediate;
+SQL> startup mount exclusive;
+SQL> alter database flashback on;
+SQL> alter database open;
+
+
+// Влючить archivelog (если выключен)
+
+SQL> shutdown immediate;
+SQL> startup mount;
+SQL> alter database archivelog;
+SQL> shutdown immediate;
+SQL> startup;
+
+===================================
+В 11 версии. 
+
+RMAN> list failure;
+RMAN> advise failure;
+RMAN> repair failure;
+Marley
+24.07.2010, 22:45
+// Работа с точками восстановления
+
+
+// Создание точки восстановления
+SQL> create restore point 'pointName';
+
+// Создание точки восстановления с гарантией отката (при включенном flashback)
+SQL> create restore point 'pointName' guarantee flashback database;
+
+// Показать точки восстановления
+SQL> select * from v$restore_point;
+
+// Удалить точку восстановления
+SQL> drop restore point 'pointName' 
+
+
+// Откатиться на точку восстановления (при включенном flashback)
+
+SQL> shutdown immediate;
+SQL> startup mount exclusive;
+SQL> flashback database to restore point 'pointName';
+SQL> alter database open;
+Marley
+24.07.2010, 23:08
+// Подключение к БД средствами RMAN
+
+// На локальном компьютере с правами администратора операционной системы. 
+CMD> rman target /
+Marley
+24.07.2010, 23:26
+// Настройка параметров резервного копирования средствами RMAN
+
+http://www.oracle.su/docs/11g/backup.112/e10642/rcmconfb.htm
+
+
+// Показать все параметры
+RMAN> show all;
+
+
+
+CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 3 DAYS;
+CONFIGURE BACKUP OPTIMIZATION ON;
+CONFIGURE DEFAULT DEVICE TYPE TO DISK; # default
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE SBT_TAPE TO '%F'; # default
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '%F'; # default
+CONFIGURE DEVICE TYPE 'SBT_TAPE' PARALLELISM 2 BACKUP TYPE TO COMPRESSED BACKUPSET;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 1 BACKUP TYPE TO BACKUPSET; # default
+CONFIGURE DATAFILE BACKUP COPIES FOR DEVICE TYPE SBT_TAPE TO 1; # default
+CONFIGURE DATAFILE BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE ARCHIVELOG BACKUP COPIES FOR DEVICE TYPE SBT_TAPE TO 1; # default
+CONFIGURE ARCHIVELOG BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE CHANNEL DEVICE TYPE 'SBT_TAPE' PARMS 'ENV=(OB_DEVICE=tape1)';
+CONFIGURE MAXSETSIZE TO UNLIMITED; # default
+CONFIGURE ENCRYPTION FOR DATABASE OFF; # default
+CONFIGURE ENCRYPTION ALGORITHM 'AES128'; # default
+CONFIGURE ARCHIVELOG DELETION POLICY TO NONE; # default
+CONFIGURE SNAPSHOT CONTROLFILE NAME TO '/disk1/oracle/dbs/snapcf_ev.f'; # default
+Marley
+25.07.2010, 09:49
+// Команды для создания резервных копий
+
+// Резервное копирование БД согласно параметров, которые можно посмотреть командой RMAN> show all;
+RMAN> backup database;
+
+// Создать backup базы данных и архивных журналов
+RMAN> backup database plus archivelog
+
+
+// Полный backup со сжатием и указанием файла 
+RMAN> bakup as compressed backupset database plus archivelog format 'c:\backupDB.bkp' ;
+
+
+// backup as copy device
+backup as copy device type disk database;
+
+// backup as backupset
+backup as backupset device type disk database;
+
+backup as backupset format '\arc.bkp'' tablespace users, system, sysaus, undo;
+
+
+// Резервное копирование ControlFile и SPFile
+RMAN> backup current controlfile spfile;
+
+SQL> alter database backup controlfile to trace as 'C:\trace.trc';
+
+
+// Резервное копирование табличного пространства 
+RMAN> backup as copy format 'C:\oracle\product\10.2.0\oradata\orcl2\backup.bkp ' tablespace users ;
+
+// Резервное копирование табличного пространства в FRA
+RMAN> backup as copy tablespace users ;
+
+// Резервное копирование datafile
+RMAN> backup datafile 'C:\oracle\product\10.2.0\oradata\orcl2\undo01.dbf ';
+
+
+
+
+// RMAN не делает бекап базы данных, но читает все блоки и проверяет их на поврежденность. Если находятся поврежденные блоки, то информация о них попадает в V$DATABASE_BLOCK_CORRUPTION
+
+RMAN> BACKUP VALIDATE DATABASE;
+
+RMAN> backup validate database archivelog all;
+
+
+// Делаем инкрементальный бекап с уровнем 0
+RMAN> backup incremental level 0 database;
+
+// Делаем инкрементальный бекап с уровнем 1
+RMAN> backup incremental level 1 database;
+
+
+// Делаем кумулятивный (включает в себя измениния отраженные в инкрементальных бекапах ) бекап с уровнем 1
+RMAN> backup incremental level 1 cumulative database;
+Marley
+25.07.2010, 09:52
+// Команды для получения текущих данных
+
+// Посмотреть, что необходимо забэкапить
+RMAN> report need backup;
+
+
+// Посмотреть список бэкапов 
+RMAN> list backup;
+
+
+
+
+List of Backup Sets
+===================
+
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+9 4.00G DISK 00:09:29 06-JAN-12
+BP Key: 9 Status: AVAILABLE Compressed: NO Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TESBACKUP_7jg8y1c9_.bkp
+
+List of Archived Logs in backup set 9
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 8 1099540 20-NOV-11 1124015 21-NOV-11
+1 9 1124015 21-NOV-11 1157147 22-NOV-11
+1 10 1157147 22-NOV-11 1177200 22-NOV-11
+1 11 1177200 22-NOV-11 1197507 22-NOV-11
+1 12 1197507 22-NOV-11 1268756 23-NOV-11
+1 13 1268756 23-NOV-11 1327790 24-NOV-11
+1 14 1327790 24-NOV-11 1348204 24-NOV-11
+1 15 1348204 24-NOV-11 1432821 26-NOV-11
+1 16 1432821 26-NOV-11 1466163 26-NOV-11
+1 17 1466163 26-NOV-11 1518002 27-NOV-11
+1 18 1518002 27-NOV-11 1584012 28-NOV-11
+1 19 1584012 28-NOV-11 1632504 29-NOV-11
+1 20 1632504 29-NOV-11 1660215 29-NOV-11
+1 21 1660215 29-NOV-11 1688980 30-NOV-11
+1 22 1688980 30-NOV-11 1709433 30-NOV-11
+1 23 1709433 30-NOV-11 1730305 30-NOV-11
+1 24 1730305 30-NOV-11 1751808 30-NOV-11
+1 25 1751808 30-NOV-11 1795355 30-NOV-11
+1 26 1795355 30-NOV-11 1850682 02-DEC-11
+1 27 1850682 02-DEC-11 1891258 02-DEC-11
+1 28 1891258 02-DEC-11 1921074 03-DEC-11
+1 29 1921074 03-DEC-11 1946395 03-DEC-11
+1 30 1946395 03-DEC-11 1991544 04-DEC-11
+1 31 1991544 04-DEC-11 2033202 05-DEC-11
+1 32 2033202 05-DEC-11 2083648 06-DEC-11
+1 33 2083648 06-DEC-11 2127615 06-DEC-11
+1 34 2127615 06-DEC-11 2179954 07-DEC-11
+1 35 2179954 07-DEC-11 2235901 09-DEC-11
+1 36 2235901 09-DEC-11 2272548 09-DEC-11
+1 37 2272548 09-DEC-11 2311394 10-DEC-11
+1 38 2311394 10-DEC-11 2338668 11-DEC-11
+1 39 2338668 11-DEC-11 2411198 12-DEC-11
+1 40 2411198 12-DEC-11 2454871 13-DEC-11
+1 41 2454871 13-DEC-11 2496065 14-DEC-11
+1 42 2496065 14-DEC-11 2517178 14-DEC-11
+1 43 2517178 14-DEC-11 2557526 15-DEC-11
+1 44 2557526 15-DEC-11 2597896 16-DEC-11
+1 45 2597896 16-DEC-11 2630400 17-DEC-11
+1 46 2630400 17-DEC-11 2663906 17-DEC-11
+1 47 2663906 17-DEC-11 2713083 18-DEC-11
+1 48 2713083 18-DEC-11 2767026 20-DEC-11
+1 49 2767026 20-DEC-11 2812948 21-DEC-11
+1 50 2812948 21-DEC-11 2858711 22-DEC-11
+1 51 2858711 22-DEC-11 2894889 22-DEC-11
+1 52 2894889 22-DEC-11 2940241 23-DEC-11
+1 53 2940241 23-DEC-11 2962652 24-DEC-11
+1 54 2962652 24-DEC-11 3006047 25-DEC-11
+1 55 3006047 25-DEC-11 3049633 26-DEC-11
+1 56 3049633 26-DEC-11 3096263 27-DEC-11
+1 57 3096263 27-DEC-11 3141640 28-DEC-11
+1 58 3141640 28-DEC-11 3178266 28-DEC-11
+1 59 3178266 28-DEC-11 3223377 29-DEC-11
+1 60 3223377 29-DEC-11 3256027 30-DEC-11
+1 61 3256027 30-DEC-11 3285577 31-DEC-11
+1 62 3285577 31-DEC-11 3332489 01-JAN-12
+1 63 3332489 01-JAN-12 3360899 01-JAN-12
+1 64 3360899 01-JAN-12 3418491 02-JAN-12
+1 65 3418491 02-JAN-12 3448246 03-JAN-12
+1 66 3448246 03-JAN-12 3466727 03-JAN-12
+1 67 3466727 03-JAN-12 3513082 04-JAN-12
+1 68 3513082 04-JAN-12 3559309 05-JAN-12
+1 69 3559309 05-JAN-12 3596409 06-JAN-12
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+11 619.50M DISK 00:02:33 06-JAN-12
+BP Key: 11 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TESBACKUP_7jgd80kc_.bkp
+
+List of Archived Logs in backup set 11
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 47 2663906 17-DEC-11 2713083 18-DEC-11
+1 48 2713083 18-DEC-11 2767026 20-DEC-11
+1 49 2767026 20-DEC-11 2812948 21-DEC-11
+1 50 2812948 21-DEC-11 2858711 22-DEC-11
+1 51 2858711 22-DEC-11 2894889 22-DEC-11
+1 52 2894889 22-DEC-11 2940241 23-DEC-11
+1 53 2940241 23-DEC-11 2962652 24-DEC-11
+1 54 2962652 24-DEC-11 3006047 25-DEC-11
+1 55 3006047 25-DEC-11 3049633 26-DEC-11
+1 56 3049633 26-DEC-11 3096263 27-DEC-11
+1 57 3096263 27-DEC-11 3141640 28-DEC-11
+1 58 3141640 28-DEC-11 3178266 28-DEC-11
+1 59 3178266 28-DEC-11 3223377 29-DEC-11
+1 60 3223377 29-DEC-11 3256027 30-DEC-11
+1 61 3256027 30-DEC-11 3285577 31-DEC-11
+1 62 3285577 31-DEC-11 3332489 01-JAN-12
+1 63 3332489 01-JAN-12 3360899 01-JAN-12
+1 64 3360899 01-JAN-12 3418491 02-JAN-12
+1 65 3418491 02-JAN-12 3448246 03-JAN-12
+1 66 3448246 03-JAN-12 3466727 03-JAN-12
+1 67 3466727 03-JAN-12 3513082 04-JAN-12
+1 68 3513082 04-JAN-12 3559309 05-JAN-12
+1 69 3559309 05-JAN-12 3596409 06-JAN-12
+1 70 3596409 06-JAN-12 3596989 06-JAN-12
+1 71 3596989 06-JAN-12 3597851 06-JAN-12
+1 72 3597851 06-JAN-12 3598175 06-JAN-12
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+14 25.50K DISK 00:00:00 06-JAN-12
+BP Key: 14 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TESBACKUP_7jgdh9sp_.bkp
+
+List of Archived Logs in backup set 14
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 73 3598175 06-JAN-12 3598351 06-JAN-12
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+17 49.01M DISK 00:00:10 06-JAN-12
+BP Key: 17 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TESBACKUP_7jgfkk7v_.bkp
+
+List of Archived Logs in backup set 17
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 68 3513082 04-JAN-12 3559309 05-JAN-12
+1 69 3559309 05-JAN-12 3596409 06-JAN-12
+1 70 3596409 06-JAN-12 3596989 06-JAN-12
+1 71 3596989 06-JAN-12 3597851 06-JAN-12
+1 72 3597851 06-JAN-12 3598175 06-JAN-12
+1 73 3598175 06-JAN-12 3598351 06-JAN-12
+1 74 3598351 06-JAN-12 3598984 06-JAN-12
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+20 1.10M DISK 00:00:00 06-JAN-12
+BP Key: 20 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TESBACKUP_7jgfpb95_.bkp
+
+List of Archived Logs in backup set 20
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 75 3598984 06-JAN-12 3599148 06-JAN-12
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+23 49.39M DISK 00:00:10 06-JAN-12
+BP Key: 23 Status: AVAILABLE Compressed: YES Tag: TAG20120106T212657
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TAG20120106T212657_7jgh7kjn_.bkp
+
+List of Archived Logs in backup set 23
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 68 3513082 04-JAN-12 3559309 05-JAN-12
+1 69 3559309 05-JAN-12 3596409 06-JAN-12
+1 70 3596409 06-JAN-12 3596989 06-JAN-12
+1 71 3596989 06-JAN-12 3597851 06-JAN-12
+1 72 3597851 06-JAN-12 3598175 06-JAN-12
+1 73 3598175 06-JAN-12 3598351 06-JAN-12
+1 74 3598351 06-JAN-12 3598984 06-JAN-12
+1 75 3598984 06-JAN-12 3599148 06-JAN-12
+1 76 3599148 06-JAN-12 3599955 06-JAN-12
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+24 Full 305.54M DISK 00:01:25 06-JAN-12
+BP Key: 24 Status: AVAILABLE Compressed: YES Tag: MYFULLBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnndf_MYFULLBACKUP_7jgh80xd_.bkp
+List of Datafiles in backup set 24
+File LV Type Ckp SCN Ckp Time Name
+---- -- ---- ---------- --------- ----
+1 Full 3599970 06-JAN-12 /u02/oradata/ora112/system01.dbf
+2 Full 3599970 06-JAN-12 /u02/oradata/ora112/sysaux01.dbf
+3 Full 3599970 06-JAN-12 /u02/oradata/ora112/undotbs01.dbf
+4 Full 3599970 06-JAN-12 /u02/oradata/ora112/users01.dbf
+5 Full 3599970 06-JAN-12 /u02/oradata/ora112/my_indexes01.dbf
+6 Full 3599970 06-JAN-12 /u02/oradata/ora112/my_data01.dbf
+
+BS Key Size Device Type Elapsed Time Completion Time
+------- ---------- ----------- ------------ ---------------
+26 7.00K DISK 00:00:00 06-JAN-12
+BP Key: 26 Status: AVAILABLE Compressed: YES Tag: TAG20120106T212840
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_annnn_TAG20120106T212840_7jghbrly_.bkp
+
+List of Archived Logs in backup set 26
+Thrd Seq Low SCN Low Time Next SCN Next Time
+---- ------- ---------- --------- ---------- ---------
+1 77 3599955 06-JAN-12 3600011 06-JAN-12
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+27 Full 1.05M DISK 00:00:02 06-JAN-12
+BP Key: 27 Status: AVAILABLE Compressed: YES Tag: TAG20120106T212841
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_ncnnf_TAG20120106T212841_7jghbtt9_.bkp
+Control File Included: Ckp SCN: 3600020 Ckp time: 06-JAN-12
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+28 Full 80.00K DISK 00:00:01 06-JAN-12
+BP Key: 28 Status: AVAILABLE Compressed: YES Tag: TAG20120106T212841
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnsnf_TAG20120106T212841_7jghbvyf_.bkp
+SPFILE Included: Modification time: 01-JAN-12
+SPFILE db_unique_name: ORA112
+
+
+
+
+RMAN> list backup summary;
+
+
+
+
+
+List of Backups
+===============
+Key TY LV S Device Type Completion Time #Pieces #Copies Compressed Tag
+------- -- -- - ----------- --------------- ------- ------- ---------- ---
+9 B A A DISK 06-JAN-12 1 1 NO TESBACKUP
+11 B A A DISK 06-JAN-12 1 1 YES TESBACKUP
+14 B A A DISK 06-JAN-12 1 1 YES TESBACKUP
+17 B A A DISK 06-JAN-12 1 1 YES TESBACKUP
+20 B A A DISK 06-JAN-12 1 1 YES TESBACKUP
+23 B A A DISK 06-JAN-12 1 1 YES TAG20120106T212657
+24 B F A DISK 06-JAN-12 1 1 YES MYFULLBACKUP
+26 B A A DISK 06-JAN-12 1 1 YES TAG20120106T212840
+27 B F A DISK 06-JAN-12 1 1 YES TAG20120106T212841
+28 B F A DISK 06-JAN-12 1 1 YES TAG20120106T212841
+
+
+
+
+
+
+RMAN> list backup of database;
+
+
+
+List of Backup Sets
+===================
+
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+24 Full 305.54M DISK 00:01:25 06-JAN-12
+BP Key: 24 Status: AVAILABLE Compressed: YES Tag: MYFULLBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnndf_MYFULLBACKUP_7jgh80xd_.bkp
+List of Datafiles in backup set 24
+File LV Type Ckp SCN Ckp Time Name
+---- -- ---- ---------- --------- ----
+1 Full 3599970 06-JAN-12 /u02/oradata/ora112/system01.dbf
+2 Full 3599970 06-JAN-12 /u02/oradata/ora112/sysaux01.dbf
+3 Full 3599970 06-JAN-12 /u02/oradata/ora112/undotbs01.dbf
+4 Full 3599970 06-JAN-12 /u02/oradata/ora112/users01.dbf
+5 Full 3599970 06-JAN-12 /u02/oradata/ora112/my_indexes01.dbf
+6 Full 3599970 06-JAN-12 /u02/oradata/ora112/my_data01.dbf
+
+
+
+
+
+RMAN> list backupset;
+
+RMAN> list copy of database;
+
+
+// Показать полный список архивных журналов
+RMAN> list archivelog all;
+
+
+// Показать устаревшие бэкапы
+RMAN> report obsolete;
+
+
+RMAN> report schema;
+
+
+Report of database schema for database with db_unique_name ORA112
+
+List of Permanent Datafiles
+===========================
+File Size(MB) Tablespace RB segs Datafile Name
+---- -------- -------------------- ------- ------------------------
+1 740 SYSTEM *** /u02/oradata/ora112/system01.dbf
+2 810 SYSAUX *** /u02/oradata/ora112/sysaux01.dbf
+3 75 UNDOTBS1 *** /u02/oradata/ora112/undotbs01.dbf
+4 5 USERS *** /u02/oradata/ora112/users01.dbf
+5 2048 MY_INDEXES *** /u02/oradata/ora112/my_indexes01.dbf
+6 2048 MY_DATA *** /u02/oradata/ora112/my_data01.dbf
+
+List of Temporary Files
+=======================
+File Size(MB) Tablespace Maxsize(MB) Tempfile Name
+---- -------- -------------------- ----------- --------------------
+1 52 TEMP 32767 /u02/oradata/ora112/temp01.dbf
+2 2048 MY_TEMP 2048 /u02/oradata/ora112/my_temp01.dbf
+
+
+
+
+
+
+RMAN> list backup of tablespace sysaux;
+
+
+
+List of Backup Sets
+===================
+
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+24 Full 305.54M DISK 00:01:25 06-JAN-12
+BP Key: 24 Status: AVAILABLE Compressed: YES Tag: MYFULLBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnndf_MYFULLBACKUP_7jgh80xd_.bkp
+List of Datafiles in backup set 24
+File LV Type Ckp SCN Ckp Time Name
+---- -- ---- ---------- --------- ----
+2 Full 3599970 06-JAN-12 /u02/oradata/ora112/sysaux01.dbf
+Marley
+25.07.2010, 10:42
+// Команды для удаления
+
+
+// Удалить устаревшие бэкапы с подтверждением удаления
+RMAN> delete obsolete;
+
+// Удалить устаревшие бэкапы без подтверждения удаления
+RMAN> delete noprompt obsolete;
+
+// Удалить архивные журналы.
+RMAN> delete archivelog all;
+
+// Удалить 
+RMAN> delete copy;
+
+
+RMAN> delete backup;
+
+RMAN> DELETE EXPIRED BACKUP;
+RMAN> DELETE EXPIRED COPY;
+
+
+// Удалить backupset с определенным ID
+RMAN> delete backupset 20;
+Marley
+30.07.2010, 19:02
+// Команды для проверки 
+
+RMAN> CROSSCHECK backup;
+RMAN> CROSSCHECK copy;
+RMAN> CROSSCHECK backup of database;
+RMAN> CROSSCHECK backup of controlfile;
+RMAN> CROSSCHECK archivelog all;
+Marley
+30.07.2010, 19:04
+Восстановление БД
+
+-------------------
+
+// Восстановление spfile из резервной копии
+RMAN> restore spfite to 'c:\spfile.ora';
+
+// Восстановление controlfiele из автобекапа
+RMAN> restore controlfile from autobackup;
+
+
+// 
+
+RUN
+{
+RESTORE SPFILE TO PFILE '/tmp/spfile.pf';
+RESTORE CURRENT CONTROLFILE TO '/tmp/ControlFile.cf';
+}
+
+
+
+
+
+// Восстановление из последнего бекапа на 15 минут назад
+
+RMAN> run{
+shutdown immediate;
+startup mount;
+set until time "sysdate-15/(24*60)"; 
+-- set until time "to_date('2010-06-01 12:50:30', 'yyyy-mm-dd hh24:mi:ss')"; 
+restore database; 
+recover database;
+alter database open resetlogs;}
+
+
+//Восстановление только табличного пространства system на время последнего бекапа
+RMAN> run{restore tablespace system; recover database;}
+
+// Восстановливать до ______________________
+recover database until cancel using backup controlfile; 
+
+
+
+// Сброс базы данных до инкарнации 3
+reset database to incarnation 3;
+Marley
+30.07.2010, 19:08
+Скрипт для выполнения резервной копии БД работающей в режиме archivelog
+
+backup.bat
+
+@echo off
+
+chcp 1251
+
+rman target / @backup.script
+rem rman target / @backup.script > backup.log
+rem pause Press any key to exit
+exit
+
+
+backup.script
+
+
+run {
+
+configure retention policy to redundancy 3;
+# configure retention policy to recovery window of 3 days;
+
+configure controlfile autobackup on;
+# configure controlfile autobackup off;
+
+CONFIGURE BACKUP OPTIMIZATION ON;
+# CONFIGURE DEFAULT DEVICE TYPE TO DISK; 
+
+# CONFIGURE DEVICE TYPE DISK BACKUP TYPE TO COPY; # image copies
+# CONFIGURE DEVICE TYPE DISK BACKUP TYPE TO BACKUPSET; # uncompressed
+CONFIGURE DEVICE TYPE DISK BACKUP TYPE TO COMPRESSED BACKUPSET;
+
+
+# backup as backupset device type disk database;
+# backup as copy device type disk database;
+
+
+# backup database;
+backup full database noexclude include current controlfile spfile;
+
+# format 'D:\backup\%d_datafile_%s_%p.bak'
+# tag 'backup_name';
+
+delete noprompt obsolete;
+
+
+sql "create PFILE = ''c:\PFILE.ora'' from SPFILE";
+
+CONFIGURE BACKUP OPTIMIZATION CLEAR;
+CONFIGURE RETENTION POLICY CLEAR;
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK CLEAR;
+
+
+} 
+
+
+
+================================================== ============
+
+Получить данные по резервным копиям.
+
+
+BackupStatus.bat
+
+
+@echo off
+
+chcp 1251
+
+
+echo Данные по резервым копиям базы данных
+echo ________________________________
+
+
+
+sqlplus / as sysdba @BackupStatus.sql
+pause Press any key to exit
+
+
+BackupStatus.sql
+
+
+
+set pagesize 200;
+
+select start_time, end_time, status from v$rman_backup_job_details order by 1 desc;
+exit;
+Marley
+30.07.2010, 19:09
+[oracle11@oracle112 ~]$ vi rmanscript.rman
+
+
+
+RUN {
+CONFIGURE DEVICE TYPE DISK BACKUP TYPE TO COMPRESSED BACKUPSET;
+BACKUP INCREMENTAL LEVEL 0 TAG testbackup DATABASE PLUS ARCHIVELOG;
+BACKUP CURRENT CONTROLFILE SPFILE;
+}
+
+
+
+
+[oracle11@oracle112 ~]$ rman target /
+
+RMAN> @rmanscript.rman
+
+
+
+RMAN> BACKUP INCREMENTAL LEVEL 1 TAG testbackup DATABASE PLUS ARCHIVELOG;
+
+RMAN> list backup of database;
+
+
+
+List of Backup Sets
+===================
+
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+12 Incr 0 305.53M DISK 00:01:15 06-JAN-12
+BP Key: 12 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnnd0_TESBACKUP_7jgddvyw_.bkp
+List of Datafiles in backup set 12
+File LV Type Ckp SCN Ckp Time Name
+---- -- ---- ---------- --------- ----
+1 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/system01.dbf
+2 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/sysaux01.dbf
+3 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/undotbs01.dbf
+4 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/users01.dbf
+5 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/my_indexes01.dbf
+6 0 Incr 3598318 06-JAN-12 /u02/oradata/ora112/my_data01.dbf
+
+BS Key Type LV Size Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+18 Incr 1 488.00K DISK 00:02:13 06-JAN-12
+BP Key: 18 Status: AVAILABLE Compressed: YES Tag: TESBACKUP
+Piece Name: /u01/app/oracle/fast_recovery_area/ORA112/backupset/2012_01_06/o1_mf_nnnd1_TESBACKUP_7jgfl0oo_.bkp
+List of Datafiles in backup set 18
+File LV Type Ckp SCN Ckp Time Name
+---- -- ---- ---------- --------- ----
+1 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/system01.dbf
+2 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/sysaux01.dbf
+3 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/undotbs01.dbf
+4 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/users01.dbf
+5 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/my_indexes01.dbf
+6 1 Incr 3598994 06-JAN-12 /u02/oradata/ora112/my_data01.dbf
+
+
+
+RMAN>
+Marley
+06.01.2012, 20:24
+// Список инкарнаций базы данных
+
+
+RMAN> list incarnation of database;
+
+
+
+List of Database Incarnations
+DB Key Inc Key DB Name DB ID STATUS Reset SCN Reset Time
+------- ------- -------- ---------------- --- ---------- ----------
+1 1 ORA112 289829761 PARENT 1 17-SEP-11
+2 2 ORA112 289829761 CURRENT 995548 20-NOV-11

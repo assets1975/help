@@ -1,3 +1,4 @@
 adduser --disabled-password --disabled-login ----no-create-home cactiuser
 useradd assets
+passwd assets
 userdel -r assets

@@ -1,0 +1,30 @@
+Use a Future to do so. Like this:
+
+Meteor.methods({
+  my_function: function(arg1, arg2) {
+
+    // Set up a future
+    var fut = new Future();
+
+    // This should work for any async method
+    setTimeout(function() {
+
+      // Return the results
+      fut.ret(message + " (delayed for 3 seconds)");
+
+    }, 3 * 1000);
+
+    // Wait for async to finish before returning
+    // the result
+    return fut.wait();
+  }
+});
+
+Update:
+To use Future starting from Meteor 0.5.1, you have to run the following code in your Meteor.startup method:
+Meteor.startup(function () {
+ var require = __meteor_bootstrap__.require
+ Future = require('fibers/future');
+
+ // use Future here
+}

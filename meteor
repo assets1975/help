@@ -23,3 +23,26 @@ Meteor.startup(function () {
 
  // use Future here
 }
+---------------db-oracle------------
+    var dbsql = function(SQL,callback){
+        var require = __meteor_bootstrap__.require;
+        var oracle = require("db-oracle");
+        new oracle.Database({
+            hostname: 'localhost',
+            user: 'cc08',
+            password: '******',
+            database: 'orclsc'
+        }).connect(function(error) {
+                if (error) {
+                    return callback(err);
+                }
+
+                this.query().execute(SQL,function(error, rows) {
+                    if (error) {
+                        return callback(err);
+                    }
+                    console.log("OK");
+                   return  callback(null,rows);
+                });
+            });
+    };

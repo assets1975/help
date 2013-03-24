@@ -1,0 +1,2 @@
+Windows 8 check system files. cmd run as administrator. 
+sfc /scannow

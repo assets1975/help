@@ -1,3 +1,0 @@
-import inspect
-import django
-print inspect.getabsfile(django)
